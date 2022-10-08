@@ -1,6 +1,10 @@
 package entity
 
-import "gorm.io/gorm"
+import (
+	"fmt"
+
+	"gorm.io/gorm"
+)
 
 type Part struct {
 	gorm.Model
@@ -8,11 +12,17 @@ type Part struct {
 	BookID uint
 	Book   *Book
 
-	Title     string
+	Title string
+
+	// TODO: rename to position
 	Possition uint
 
 	Source string
-	Path   string
+	// Path   string
 
 	Duration uint
+}
+
+func (p *Part) Path() string {
+	return fmt.Sprintf("%d/%d.mp3", p.BookID, p.ID)
 }

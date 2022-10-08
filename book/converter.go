@@ -14,7 +14,9 @@ type Converter struct {
 }
 
 func NewConverter(bookDir string) *Converter {
-	return &Converter{bookDir: bookDir}
+	return &Converter{
+		bookDir: bookDir,
+	}
 }
 
 func (c *Converter) Convert(part entity.Part) error {

@@ -8,8 +8,6 @@ type Book struct {
 	DownloadID uint
 	Download   *Download
 
-	Parts []Part
-
 	Title   string
 	Author  string
 	Reader  string

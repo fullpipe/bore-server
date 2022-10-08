@@ -1,0 +1,34 @@
+type Book {
+  id: ID!
+  title: String!
+  author: String!
+  reader: String!
+  parts: [Part!]!
+}
+
+type Part {
+  id: ID!
+  title: String!
+  possition: Uint!
+  source: String!
+  path: String!
+}
+
+type Query {
+  books(filter: BooksFilter): [Book!]!
+  book(id: ID!): Book
+}
+
+input BooksFilter {
+  search: String
+}
+
+input NewBook {
+  magnet: String!
+}
+
+type Mutation {
+  createBook(input: NewBook!): Book!
+}
+
+scalar Uint

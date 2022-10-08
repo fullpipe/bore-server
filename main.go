@@ -1,20 +1,13 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
-	"path"
-	"path/filepath"
-	"sort"
-	"strings"
 
-	"github.com/dhowden/tag"
-	bookSrv "github.com/fullpipe/bore-server/book"
+	"github.com/fullpipe/bore-server/cmd/server"
 	"github.com/fullpipe/bore-server/entity"
-	"github.com/fullpipe/bore-server/repository"
-	"github.com/fullpipe/bore-server/torrent"
 	"github.com/glebarez/sqlite"
+	"github.com/urfave/cli"
 	"gorm.io/gorm"
 )
 
@@ -30,146 +23,15 @@ func main() {
 	db.AutoMigrate(&entity.Book{})
 	db.AutoMigrate(&entity.Part{})
 
-	// create download
-	drp := repository.NewDownloadRepo(db)
-	d := drp.FindByMagnet(MagnetLink)
-	fmt.Println(d)
-	if d == nil {
-		d = entity.NewDownload(MagnetLink)
-	}
-	db.Save(d)
-
-	// start download
-	downloader := torrent.NewDownloader("./downloads", db)
-	err = downloader.Download(d)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	// create book
-	book := &entity.Book{
-		DownloadID: d.ID,
-		Title:      d.Name,
-	}
-	db.Save(book)
-
-	// get downloaded files in order
-	paths, err := getFilePathsInOrder(d)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	parts := []*entity.Part{}
-	for i, path := range paths {
-		f, err := os.OpenFile(path, os.O_RDONLY, os.ModePerm)
-		if err != nil {
-			log.Fatalln(err)
-		}
-
-		m, err := tag.ReadFrom(f)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		if m.Album() != "" {
-			book.Title = m.Album()
-		}
-
-		if m.Artist() != "" && book.Author == "" {
-			book.Author = m.Artist()
-		}
-
-		if m.AlbumArtist() != "" && book.Reader == "" {
-			book.Reader = m.AlbumArtist()
-		}
-
-		// TODO: add book piture
-		// book.Picture: "???",
-
-		part := &entity.Part{
-			BookID:    book.ID,
-			Title:     m.Title(),
-			Possition: uint(i),
-			Source:    path,
-		}
-
-		db.Save(part)
-
-		parts = append(parts, part)
-	}
-
-	// get meta info
-	// create BookPart
-	// 	source = source file path
-	//  dest = destination file path
-	//  meta
-	//  duration
-	// 	possition = i
-	//
-	// convert them to webp
-
-	bkr := repository.NewBookRepo(db)
-	book = bkr.FindByID(book.ID)
-	converter := bookSrv.NewConverter("./public")
-	for _, part := range book.Parts {
-		err := converter.Convert(part)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-
-	// book ready
-	// remove download
-}
-
-func convert(part *entity.Part) error {
-	fmt.Println(*part)
-	return nil
-}
-
-func getFilePathsInOrder(d *entity.Download) ([]string, error) {
-	root := path.Join("./downloads", d.Name)
-	paths := []string{}
-
-	err := filepath.Walk(
-		root,
-		func(path string, info os.FileInfo, err error) error {
-			if err != nil {
-				return err
-			}
-
-			if !info.IsDir() {
-				paths = append(paths, path)
-			}
-
-			return nil
+	app := &cli.App{
+		Name:  "boom",
+		Usage: "make an explosive entrance",
+		Commands: []cli.Command{
+			server.NewCommand(),
 		},
-	)
-
-	if err != nil {
-		return nil, err
 	}
 
-	sort.Slice(paths, func(i, j int) bool {
-		return strings.Compare(paths[i], paths[j]) > 0
-	})
-
-	return paths, nil
+	if err := app.Run(os.Args); err != nil {
+		log.Fatal(err)
+	}
 }
-
-// func filesInOrder(files []fs.DirEntry) []fs.DirEntry {
-// 	inOrder := []fs.DirEntry{}
-// 	sort.Slice(files, func(i, j int) bool {
-// 		return strings.Compare(files[i].Name(), files[j].Name()) > 0
-// 	})
-
-// 	for _, f := range files {
-// 		if f.IsDir() {
-// 			inOrder = append(inOrder, filesInOrder([]fs.DirEntry{f})...)
-// 		} else {
-// 			inOrder = append(inOrder, f)
-// 		}
-// 	}
-
-// 	return inOrder
-// }

@@ -9,3 +9,4 @@ vendor/
 downloads/
 .DS_Store
 public/
+graph/generated/generated.go
