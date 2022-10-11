@@ -10,6 +10,7 @@ require (
 	github.com/go-chi/chi v1.5.4
 	github.com/joho/godotenv v1.4.0
 	github.com/kelseyhightower/envconfig v1.4.0
+	github.com/pkg/errors v0.9.1
 	github.com/rs/cors v1.8.2
 	github.com/u2takey/ffmpeg-go v0.4.1
 	github.com/urfave/cli v1.22.10
@@ -79,7 +80,6 @@ require (
 	github.com/pion/turn/v2 v2.0.8 // indirect
 	github.com/pion/udp v0.1.1 // indirect
 	github.com/pion/webrtc/v3 v3.1.42 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20200410134404-eec4a21b6bb0 // indirect
 	github.com/rs/dnscache v0.0.0-20211102005908-e0241e321417 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect

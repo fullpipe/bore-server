@@ -62,6 +62,15 @@ func (r *bookResolver) Parts(ctx context.Context, obj *entity.Book) ([]*entity.P
 	return parts, nil
 }
 
+// Download is the resolver for the download field.
+func (r *bookResolver) Download(ctx context.Context, book *entity.Book) (*entity.Download, error) {
+	var d entity.Download
+	r.db.
+		First(&d, book.DownloadID)
+
+	return &d, nil
+}
+
 // CreateBook is the resolver for the createBook field.
 func (r *mutationResolver) CreateBook(ctx context.Context, input model.NewBook) (*entity.Book, error) {
 	// create download

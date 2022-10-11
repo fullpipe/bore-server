@@ -42,7 +42,8 @@ resolver:
 # gqlgen will search for any type names in the schema in these go packages
 # if they match it will use them, otherwise it will generate them.
 autobind:
-#  - "github.com/fullpipe/bore-server/graph/model"
+  - 'github.com/fullpipe/bore-server/graph/model'
+  - 'github.com/fullpipe/bore-server/entity'
 
 # This section declares type mapping between the GraphQL and go type systems
 #
@@ -55,8 +56,8 @@ models:
     fields:
       parts:
         resolver: true
-  Part:
-    model: github.com/fullpipe/bore-server/entity.Part
+      download:
+        resolver: true
   ID:
     model:
       - github.com/99designs/gqlgen/graphql.Uint
@@ -68,6 +69,9 @@ models:
       - github.com/99designs/gqlgen/graphql.Int
       - github.com/99designs/gqlgen/graphql.Int64
       - github.com/99designs/gqlgen/graphql.Int32
+  Int64:
+    model:
+      - github.com/99designs/gqlgen/graphql.Int64
   Uint:
     model:
       - github.com/99designs/gqlgen/graphql.Uint

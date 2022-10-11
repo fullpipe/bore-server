@@ -4,6 +4,7 @@ type Book {
   author: String!
   reader: String!
   parts: [Part!]!
+  download: Download
 }
 
 type Part {
@@ -12,6 +13,15 @@ type Part {
   possition: Uint!
   source: String!
   path: String!
+}
+
+type Download {
+  id: ID!
+  name: String!
+  magnet: String!
+  state: DownloadState!
+  Length: Int64!
+  Downloaded: Int64!
 }
 
 type Query {
@@ -23,12 +33,14 @@ input BooksFilter {
   search: String
 }
 
-input NewBook {
-  magnet: String!
-}
-
 type Mutation {
   createBook(input: NewBook!): Book!
 }
 
+input NewBook {
+  magnet: String!
+}
+
 scalar Uint
+scalar Int64
+scalar DownloadState
