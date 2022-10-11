@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/fullpipe/bore-server/mail"
 	"github.com/kelseyhightower/envconfig"
 )
 
@@ -21,6 +22,7 @@ type Config struct {
 	Debug       bool
 
 	Server Server
+	Mailer mail.MailerConfig
 }
 
 type Server struct {

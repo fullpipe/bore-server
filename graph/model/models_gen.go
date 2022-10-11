@@ -6,6 +6,20 @@ type BooksFilter struct {
 	Search *string `json:"search"`
 }
 
-type NewBook struct {
+type Jwt struct {
+	Access  string `json:"access"`
+	Refresh string `json:"refresh"`
+}
+
+type LoginInput struct {
+	RequestID uint   `json:"requestID"`
+	Code      string `json:"code"`
+}
+
+type LoginRequestInput struct {
+	Email string `json:"email"`
+}
+
+type NewBookInput struct {
 	Magnet string `json:"magnet"`
 }

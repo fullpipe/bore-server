@@ -4,16 +4,21 @@ package graph
 
 import (
 	"context"
+	"errors"
 	"log"
 	"os"
+	"time"
 
 	"github.com/dhowden/tag"
 	bookSrv "github.com/fullpipe/bore-server/book"
 	"github.com/fullpipe/bore-server/config"
 	"github.com/fullpipe/bore-server/entity"
 	"github.com/fullpipe/bore-server/graph/model"
+	"github.com/fullpipe/bore-server/jwt"
+	"github.com/fullpipe/bore-server/mail"
 	"github.com/fullpipe/bore-server/repository"
 	"github.com/fullpipe/bore-server/torrent"
+	"github.com/fullpipe/passhash"
 	"gorm.io/gorm"
 )
 
@@ -23,6 +28,8 @@ type Resolver struct {
 	downloadRepo *repository.DownloadRepo
 	downloader   *torrent.Downloader
 	converter    *bookSrv.Converter
+	mailer       *mail.Mailer
+	jwtBuilder   *jwt.Builder
 }
 
 func NewResolver(
@@ -30,12 +37,15 @@ func NewResolver(
 	cfg config.Config,
 
 ) *Resolver {
+	mailer, _ := mail.NewMailer(cfg.Mailer)
+
 	return &Resolver{
 		db:           db,
 		bookRepo:     repository.NewBookRepo(db),
 		downloadRepo: repository.NewDownloadRepo(db),
 		downloader:   torrent.NewDownloader(cfg.TorrentsDir, db),
 		converter:    bookSrv.NewConverter(cfg.BooksDir),
+		mailer:       mailer,
 	}
 }
 
@@ -71,8 +81,67 @@ func (r *bookResolver) Download(ctx context.Context, book *entity.Book) (*entity
 	return &d, nil
 }
 
+// LoginRequest is the resolver for the loginRequest field.
+func (r *mutationResolver) LoginRequest(ctx context.Context, input model.LoginRequestInput) (uint, error) {
+	// otp := utils.RandOTP()
+	otp := "111112"
+	hash, err := passhash.NewHash().HashPassword(otp)
+	if err != nil {
+		return 0, err
+	}
+
+	otpRequest := entity.LoginRequest{
+		Email:     input.Email,
+		Code:      hash,
+		ExpiresAt: time.Now().Add(time.Minute * 100), //TODO: correct time
+	}
+
+	r.db.Create(&otpRequest)
+
+	err = r.mailer.SendToEmail(
+		"login.post_login_request",
+		input.Email,
+		mail.WithParam("otp", otp),
+	)
+
+	return otpRequest.ID, nil
+}
+
+// Login is the resolver for the login field.
+func (r *mutationResolver) Login(ctx context.Context, input model.LoginInput) (*model.Jwt, error) {
+	var request entity.LoginRequest
+	result := r.db.Where("expires_at > NOW()").First(&request, input.RequestID)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return nil, errors.New("no request id")
+	}
+
+	if !passhash.NewHash().CheckPasswordHash(request.Code, input.Code) {
+		return nil, errors.New("invalid code")
+	}
+
+	var user entity.User
+	result = r.db.First(&user, &entity.User{Email: request.Email})
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		user = entity.User{Email: request.Email}
+		r.db.Save(&user)
+	}
+
+	jwt, err := r.jwtBuilder.Build(jwt.Payload{
+		UserID: user.ID,
+		Roles:  user.Roles,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.Jwt{
+		Access:  jwt.AccessToken,
+		Refresh: jwt.RefreshToken,
+	}, nil
+}
+
 // CreateBook is the resolver for the createBook field.
-func (r *mutationResolver) CreateBook(ctx context.Context, input model.NewBook) (*entity.Book, error) {
+func (r *mutationResolver) CreateBook(ctx context.Context, input model.NewBookInput) (*entity.Book, error) {
 	// create download
 	d := r.downloadRepo.FindByMagnet(input.Magnet)
 	if d == nil {

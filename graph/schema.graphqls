@@ -24,6 +24,11 @@ type Download {
   Downloaded: Int64!
 }
 
+type JWT {
+  access: String!
+  refresh: String!
+}
+
 type Query {
   books(filter: BooksFilter): [Book!]!
   book(id: ID!): Book
@@ -34,10 +39,21 @@ input BooksFilter {
 }
 
 type Mutation {
-  createBook(input: NewBook!): Book!
+  createBook(input: NewBookInput!): Book!
+  loginRequest(input: LoginRequestInput!): ID!
+  login(input: LoginInput!): JWT!
 }
 
-input NewBook {
+input LoginRequestInput {
+  email: String!
+}
+
+input LoginInput {
+  requestID: ID!
+  code: String!
+}
+
+input NewBookInput {
   magnet: String!
 }
 

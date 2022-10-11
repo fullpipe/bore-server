@@ -23,6 +23,8 @@ func main() {
 	db.AutoMigrate(&entity.Download{})
 	db.AutoMigrate(&entity.Book{})
 	db.AutoMigrate(&entity.Part{})
+	db.AutoMigrate(&entity.LoginRequest{})
+	db.AutoMigrate(&entity.User{})
 
 	app := &cli.App{
 		Name:  "boom",
