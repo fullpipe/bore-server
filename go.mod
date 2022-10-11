@@ -8,7 +8,8 @@ require (
 	github.com/dhowden/tag v0.0.0-20220618230019-adf36e896086
 	github.com/glebarez/sqlite v1.4.8
 	github.com/go-chi/chi v1.5.4
-	github.com/gorilla/websocket v1.5.0
+	github.com/joho/godotenv v1.4.0
+	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/rs/cors v1.8.2
 	github.com/u2takey/ffmpeg-go v0.4.1
 	github.com/urfave/cli v1.22.10
@@ -51,6 +52,7 @@ require (
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/google/btree v1.1.2 // indirect
 	github.com/google/uuid v1.3.0 // indirect
+	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/huandu/xstrings v1.3.2 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect

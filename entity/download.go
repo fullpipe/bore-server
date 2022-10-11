@@ -7,6 +7,7 @@ const (
 	DownloadStateInProgress DownloadState = "in_progress"
 	DownloadStateError      DownloadState = "error"
 	DownloadStateDone       DownloadState = "done"
+	DownloadStateDelete     DownloadState = "delete"
 )
 
 func NewDownload(magnet string) *Download {

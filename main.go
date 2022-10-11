@@ -7,6 +7,7 @@ import (
 	"github.com/fullpipe/bore-server/cmd/server"
 	"github.com/fullpipe/bore-server/entity"
 	"github.com/glebarez/sqlite"
+	_ "github.com/joho/godotenv/autoload"
 	"github.com/urfave/cli"
 	"gorm.io/gorm"
 )

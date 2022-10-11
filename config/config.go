@@ -1,0 +1,28 @@
+package config
+
+import (
+	"github.com/kelseyhightower/envconfig"
+)
+
+func GetConfig() (Config, error) {
+	var config Config
+	err := envconfig.Process("bore", &config)
+	if err != nil {
+		return Config{}, err
+	}
+
+	return config, nil
+}
+
+type Config struct {
+	LiteDB      string `required:"true"`
+	BooksDir    string `required:"true"`
+	TorrentsDir string `required:"true"`
+	Debug       bool
+
+	Server Server
+}
+
+type Server struct {
+	Port int `default:"8080"`
+}

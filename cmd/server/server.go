@@ -1,18 +1,17 @@
 package server
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/fullpipe/bore-server/config"
 	"github.com/fullpipe/bore-server/graph"
 	"github.com/fullpipe/bore-server/graph/generated"
-	"github.com/fullpipe/bore-server/repository"
 	"github.com/glebarez/sqlite"
 	"github.com/go-chi/chi"
-	"github.com/gorilla/websocket"
 	"github.com/rs/cors"
 	"github.com/urfave/cli"
 	"gorm.io/gorm"
@@ -29,6 +28,11 @@ func NewCommand() cli.Command {
 }
 
 func server(cCtx *cli.Context) error {
+	cfg, err := config.GetConfig()
+	if err != nil {
+		return err
+	}
+
 	router := chi.NewRouter()
 
 	// Add CORS middleware around every request
@@ -36,31 +40,35 @@ func server(cCtx *cli.Context) error {
 	router.Use(cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:8080", "http://localhost:8100"},
 		AllowCredentials: true,
-		Debug:            true,
+		Debug:            cfg.Debug,
 	}).Handler)
 
-	db, err := gorm.Open(sqlite.Open("lite.db"), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open(cfg.LiteDB), &gorm.Config{})
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	bookRepo := repository.NewBookRepo(db)
+	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: graph.NewResolver(db, cfg)}))
 
-	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: graph.NewResolver(db, bookRepo)}))
+	// srv.AddTransport(&transport.Websocket{
+	// 	Upgrader: websocket.Upgrader{
+	// 		CheckOrigin: func(r *http.Request) bool {
+	// 			// Check against your desired domains here
+	// 			return r.Host == "example.org"
+	// 		},
+	// 		ReadBufferSize:  1024,
+	// 		WriteBufferSize: 1024,
+	// 	},
+	// })
 
-	srv.AddTransport(&transport.Websocket{
-		Upgrader: websocket.Upgrader{
-			CheckOrigin: func(r *http.Request) bool {
-				// Check against your desired domains here
-				return r.Host == "example.org"
-			},
-			ReadBufferSize:  1024,
-			WriteBufferSize: 1024,
-		},
-	})
+	fs := http.FileServer(http.Dir(cfg.BooksDir))
+	router.Handle("/books/*", http.StripPrefix("/books", fs))
 
-	router.Handle("/", playground.Handler("Bore", "/query"))
+	if cfg.Debug {
+		router.Handle("/playground", playground.Handler("Bore", "/query"))
+	}
+
 	router.Handle("/query", srv)
 
-	return http.ListenAndServe(":8080", router)
+	return http.ListenAndServe(fmt.Sprintf(":%d", cfg.Server.Port), router)
 }

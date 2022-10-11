@@ -20,8 +20,6 @@ func NewConverter(bookDir string) *Converter {
 }
 
 func (c *Converter) Convert(part entity.Part) error {
-	c.bookDir = "./public/"
-
 	dir := filepath.Join(c.bookDir, fmt.Sprintf("%d", part.BookID))
 	out := filepath.Join(dir, fmt.Sprintf("%d.mp3", part.ID))
 
