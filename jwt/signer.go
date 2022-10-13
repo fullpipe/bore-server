@@ -1,7 +1,5 @@
 package jwt
 
-//go:generate mockgen -source signer.go -destination=./mock/signer_mock.go -package=mock
-
 import (
 	"crypto"
 

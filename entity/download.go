@@ -26,6 +26,7 @@ type Download struct {
 
 	Length     int64
 	Downloaded int64
+	Error      string
 }
 
 type DownloadState string

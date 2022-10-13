@@ -38,7 +38,7 @@ func server(cCtx *cli.Context) error {
 	// Add CORS middleware around every request
 	// See https://github.com/rs/cors for full option listing
 	router.Use(cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:8080", "http://localhost:8100"},
+		AllowedOrigins:   []string{"http://localhost:8080", "http://localhost:8100", "http://localhost:4200"},
 		AllowCredentials: true,
 		Debug:            cfg.Debug,
 	}).Handler)

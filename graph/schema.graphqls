@@ -4,7 +4,9 @@ type Book {
   author: String!
   reader: String!
   parts: [Part!]!
-  download: Download
+  download: Download!
+  error: String
+  state: BookState!
 }
 
 type Part {
@@ -20,8 +22,9 @@ type Download {
   name: String!
   magnet: String!
   state: DownloadState!
-  Length: Int64!
-  Downloaded: Int64!
+  length: Int64!
+  downloaded: Int64!
+  error: String
 }
 
 type JWT {
@@ -60,3 +63,4 @@ input NewBookInput {
 scalar Uint
 scalar Int64
 scalar DownloadState
+scalar BookState

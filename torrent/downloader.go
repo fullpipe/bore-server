@@ -39,13 +39,13 @@ func (dr *Downloader) Download(d *entity.Download) error {
 
 	c, err := torrent.NewClient(cfg)
 	if err != nil {
-		return errors.Wrap(err, "unable to start torrent client")
+		return dr.addError(d, err, "unable to start torrent client")
 	}
 	defer c.Close()
 
 	t, err := c.AddMagnet(d.Magnet)
 	if err != nil {
-		return errors.Wrap(err, "unable to get info")
+		return dr.addError(d, err, "unable to get info")
 	}
 	<-t.GotInfo()
 
@@ -57,12 +57,23 @@ func (dr *Downloader) Download(d *entity.Download) error {
 	t.DownloadAll()
 
 	done := c.WaitAll()
-	if done {
-		d.State = entity.DownloadStateDone
-		dr.db.Save(&d)
+	if !done {
+		return dr.addError(d, errors.New("unable to download torrent"), "after WaitAll")
 	}
 
+	d.State = entity.DownloadStateDone
+	d.Error = ""
+	dr.db.Save(&d)
+
 	return nil
+}
+
+func (dr *Downloader) addError(d *entity.Download, err error, wrap string) error {
+	d.State = entity.DownloadStateError
+	d.Error = errors.Wrap(err, wrap).Error()
+	dr.db.Save(d)
+
+	return errors.Wrap(err, wrap)
 }
 
 func (dr *Downloader) GetFilePathsInOrder(d *entity.Download) ([]string, error) {

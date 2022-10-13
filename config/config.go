@@ -23,8 +23,14 @@ type Config struct {
 
 	Server Server
 	Mailer mail.MailerConfig
+	JWT    JWT
 }
 
 type Server struct {
 	Port int `default:"8080"`
+}
+
+type JWT struct {
+	PrivateKey string `required:"true"`
+	PublicKey  string `required:"true"`
 }
