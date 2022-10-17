@@ -10,6 +10,7 @@ import (
 	"github.com/anacrolix/torrent"
 	"github.com/fullpipe/bore-server/entity"
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
 
@@ -29,6 +30,12 @@ type Downloader struct {
 
 func (dr *Downloader) Download(d *entity.Download) error {
 	if d.State == entity.DownloadStateDone {
+		log.Infof("Download #%d already downloaded", d.ID)
+		return nil
+	}
+
+	if d.State == entity.DownloadStateDelete {
+		log.Infof("Download #%d already downloaded", d.ID)
 		return nil
 	}
 

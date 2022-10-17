@@ -30,6 +30,13 @@ type Download {
 type JWT {
   access: String!
   refresh: String!
+  roles: [Role!]!
+}
+
+directive @hasRole(role: Role!) on FIELD_DEFINITION
+enum Role {
+  ADMIN
+  USER
 }
 
 type Query {
@@ -42,7 +49,8 @@ input BooksFilter {
 }
 
 type Mutation {
-  createBook(input: NewBookInput!): Book!
+  createBook(input: NewBookInput!): Book! @hasRole(role: ADMIN)
+  refreshToken(refreshToken: String!): JWT!
   loginRequest(input: LoginRequestInput!): ID!
   login(input: LoginInput!): JWT!
 }

@@ -7,12 +7,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/fullpipe/bore-server/entity"
 	"github.com/fullpipe/bore-server/graph/generated"
 	"github.com/fullpipe/bore-server/graph/model"
-	"github.com/fullpipe/bore-server/jwt"
 	"github.com/fullpipe/bore-server/mail"
 	"github.com/fullpipe/passhash"
 	"gorm.io/gorm"
@@ -63,6 +63,22 @@ func (r *mutationResolver) CreateBook(ctx context.Context, input model.NewBookIn
 	return book, nil
 }
 
+// RefreshToken is the resolver for the refreshToken field.
+func (r *mutationResolver) RefreshToken(ctx context.Context, refreshToken string) (*model.Jwt, error) {
+	payload, err := r.refreshParser.Parse(refreshToken)
+	if err != nil {
+		return nil, err
+	}
+
+	var user entity.User
+	result := r.db.First(&user, payload.UserID)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return nil, errors.New("user not exists")
+	}
+
+	return jwtResponce(r.jwtBuilder, &user)
+}
+
 // LoginRequest is the resolver for the loginRequest field.
 func (r *mutationResolver) LoginRequest(ctx context.Context, input model.LoginRequestInput) (uint, error) {
 	// otp := utils.RandOTP()
@@ -106,26 +122,16 @@ func (r *mutationResolver) Login(ctx context.Context, input model.LoginInput) (*
 	}
 
 	var user entity.User
-	result = r.db.First(&user, &entity.User{Email: request.Email})
+	email := strings.ToLower(request.Email)
+	result = r.db.First(&user, &entity.User{Email: email})
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		user = entity.User{Email: request.Email}
+		user = entity.User{Email: email}
 		r.db.Save(&user)
 	}
 
 	r.db.Unscoped().Delete(&request)
 
-	jwt, err := r.jwtBuilder.Build(jwt.Payload{
-		UserID: user.ID,
-		Roles:  user.Roles,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return &model.Jwt{
-		Access:  jwt.AccessToken,
-		Refresh: jwt.RefreshToken,
-	}, nil
+	return jwtResponce(r.jwtBuilder, &user)
 }
 
 // Books is the resolver for the books field.

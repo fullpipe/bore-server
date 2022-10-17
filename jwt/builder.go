@@ -33,14 +33,16 @@ func (b *Builder) Build(payload Payload) (Pair, error) {
 	}
 
 	claims.Type = "access"
-	claims.ExpiresAt = jwt.NewNumericDate(issuedAt.Add(AccessTokenTTL))
+	// TODO: token refresh
+	// claims.ExpiresAt = jwt.NewNumericDate(issuedAt.Add(AccessTokenTTL))
 	accessStr, err := b.signer.Sign(claims)
 	if err != nil {
 		return Pair{}, err
 	}
 
 	claims.Type = "refresh"
-	claims.ExpiresAt = jwt.NewNumericDate(issuedAt.Add(RefreshTokenTTL))
+	// TODO: token refresh
+	// claims.ExpiresAt = jwt.NewNumericDate(issuedAt.Add(RefreshTokenTTL))
 	refreshStr, err := b.signer.Sign(claims)
 	if err != nil {
 		return Pair{}, err

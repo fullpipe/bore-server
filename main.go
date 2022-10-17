@@ -1,13 +1,14 @@
 package main
 
 import (
-	"log"
 	"os"
 
+	"github.com/fullpipe/bore-server/cmd/promote"
 	"github.com/fullpipe/bore-server/cmd/server"
 	"github.com/fullpipe/bore-server/entity"
 	"github.com/glebarez/sqlite"
 	_ "github.com/joho/godotenv/autoload"
+	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 	"gorm.io/gorm"
 )
@@ -20,6 +21,8 @@ func main() {
 		log.Fatalln(err)
 	}
 
+	db.Debug()
+
 	db.AutoMigrate(&entity.Download{})
 	db.AutoMigrate(&entity.Book{})
 	db.AutoMigrate(&entity.Part{})
@@ -31,6 +34,7 @@ func main() {
 		Usage: "make an explosive entrance",
 		Commands: []cli.Command{
 			server.NewCommand(),
+			promote.NewPromoteCommand(),
 		},
 	}
 

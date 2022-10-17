@@ -8,7 +8,7 @@ import (
 )
 
 type Parser interface {
-	Parse(token string) (Payload, error)
+	Parse(token string) (*Payload, error)
 }
 
 type EdDSAParser struct {
