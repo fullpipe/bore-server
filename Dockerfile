@@ -21,17 +21,6 @@ COPY . .
 
 RUN go build -a -installsuffix cgo -ldflags="-w -s" -o /go/bin/app
 
-# MIGRATIONS
-# FROM scratch as migrations
-
-# WORKDIR /app
-
-# COPY --from=build /bin/goose /bin/goose
-# COPY migrations /app/migrations
-
-# # ENTRYPOINT ["goose", "-dir", "migrations", "postgres"]
-# ENTRYPOINT []
-
 # release
 FROM scratch as release
 COPY --from=mwader/static-ffmpeg:5.1.2 /ffmpeg /usr/local/bin/

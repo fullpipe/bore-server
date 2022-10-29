@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bore-server
+  labels:
+    app: bore-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bore-server
+  template:
+    metadata:
+      labels:
+        app: bore-server
+    spec:
+      containers:
+        - name: bore-server
+          image: rg.fr-par.scw.cloud/???/bore-server:latest
+          command: ['/go/bin/app', 'server']
+          imagePullPolicy: Always
+          envFrom:
+            - secretRef:
+                name: server-env
+          resources:
+            limits:
+              cpu: '200m'
+              memory: '64Mi'
+      imagePullSecrets:
+        - name: registry-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bore-server-service
+spec:
+  ports:
+    - name: http
+      targetPort: 8080
+      port: 8080
+  selector:
+    app: bore-server
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: bore-server-ingress
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+spec:
+  tls:
+    - secretName: bore.fullpipe.dev-cert
+  rules:
+    - host: bore.fullpipe.dev
+      http:
+        paths:
+          - path: /query
+            pathType: Prefix
+            backend:
+              service:
+                name: bore-server-service
+                port:
+                  number: 8080
+          - path: /playground
+            pathType: Prefix
+            backend:
+              service:
+                name: bore-server-service
+                port:
+                  number: 8080
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: bore.fullpipe.dev-cert
+  namespace: default
+spec:
+  commonName: bore.fullpipe.dev
+  secretName: bore.fullpipe.dev-cert
+  dnsNames:
+    - bore.fullpipe.dev
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
