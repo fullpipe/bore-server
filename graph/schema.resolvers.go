@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/fullpipe/bore-server/auth"
 	"github.com/fullpipe/bore-server/entity"
 	"github.com/fullpipe/bore-server/graph/generated"
 	"github.com/fullpipe/bore-server/graph/model"
@@ -38,14 +39,24 @@ func (r *bookResolver) Download(ctx context.Context, obj *entity.Book) (*entity.
 	return &d, nil
 }
 
+// Progress is the resolver for the progress field.
+func (r *bookResolver) Progress(ctx context.Context, obj *entity.Book) (*entity.Progress, error) {
+	user := auth.User(ctx)
+	if user == nil {
+		return nil, nil
+	}
+
+	return r.progressRepo.FindByBook(obj.ID, user.ID), nil
+}
+
 // CreateBook is the resolver for the createBook field.
 func (r *mutationResolver) CreateBook(ctx context.Context, input model.NewBookInput) (*entity.Book, error) {
 	// create download
 	d := r.downloadRepo.FindByMagnet(input.Magnet)
 	if d == nil {
 		d = entity.NewDownload(input.Magnet)
+		r.db.Save(d)
 	}
-	r.db.Save(d)
 
 	// create book
 	book := r.bookRepo.FindByDownload(d.ID)
@@ -55,12 +66,47 @@ func (r *mutationResolver) CreateBook(ctx context.Context, input model.NewBookIn
 			State:      entity.BookStateDownload,
 		}
 
+		// reinit download if its a new book
+		d.State = entity.DownloadStateNew
+		r.db.Save(d)
+
 		r.db.Save(book)
 	}
 
 	go r.downloadAndConvert(d, book)
 
 	return book, nil
+}
+
+// Delete is the resolver for the delete field.
+func (r *mutationResolver) Delete(ctx context.Context, bookID uint) (bool, error) {
+	book := r.bookRepo.FindByID(bookID)
+	if book == nil {
+		return false, errors.New("book not found")
+	}
+
+	err := r.converter.Delete(book)
+	if err != nil {
+		return false, err
+	}
+	r.db.Delete(book)
+
+	download := r.downloadRepo.FindByID(book.DownloadID)
+	if download == nil {
+		return false, errors.New("book not found")
+	}
+
+	err = r.downloader.Delete(download)
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
+// Restart is the resolver for the restart field.
+func (r *mutationResolver) Restart(ctx context.Context, bookID uint) (bool, error) {
+	panic(fmt.Errorf("not implemented: Restart - restart"))
 }
 
 // RefreshToken is the resolver for the refreshToken field.
@@ -134,6 +180,32 @@ func (r *mutationResolver) Login(ctx context.Context, input model.LoginInput) (*
 	return jwtResponce(r.jwtBuilder, &user)
 }
 
+// Progress is the resolver for the progress field.
+func (r *mutationResolver) Progress(ctx context.Context, input model.ProgressInput) (*entity.Progress, error) {
+	user := auth.User(ctx)
+	if user == nil {
+		return nil, errors.New("auth required")
+	}
+
+	p := r.progressRepo.FindByBook(input.BookID, user.ID)
+	if p == nil {
+		p = &entity.Progress{
+			BookID: input.BookID,
+			UserID: user.ID,
+		}
+	}
+
+	p.Part = input.Part
+	p.Speed = input.Speed
+	p.Position = input.Position
+	p.GlobalDuration = input.GlobalDuration
+	p.GlobalPosition = input.GlobalPosition
+
+	r.db.Save(p)
+
+	return p, nil
+}
+
 // Books is the resolver for the books field.
 func (r *queryResolver) Books(ctx context.Context, filter *model.BooksFilter) ([]*entity.Book, error) {
 	return r.bookRepo.All(), nil
@@ -144,6 +216,16 @@ func (r *queryResolver) Book(ctx context.Context, id uint) (*entity.Book, error)
 	book := r.bookRepo.FindByID(id)
 
 	return book, nil
+}
+
+// LastBooks is the resolver for the lastBooks field.
+func (r *queryResolver) LastBooks(ctx context.Context) ([]*entity.Book, error) {
+	user := auth.User(ctx)
+	if user == nil {
+		return nil, nil
+	}
+
+	return r.bookRepo.FindWithProgress(user.ID), nil
 }
 
 // Book returns generated.BookResolver implementation.

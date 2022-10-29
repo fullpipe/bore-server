@@ -7,6 +7,7 @@ type Book {
   download: Download!
   error: String
   state: BookState!
+  progress: Progress
 }
 
 type Part {
@@ -33,6 +34,15 @@ type JWT {
   roles: [Role!]!
 }
 
+type Progress {
+  part: Uint!
+  speed: Float!
+  position: Float!
+  globalDuration: Float!
+  globalPosition: Float!
+  updatedAt: Time!
+}
+
 directive @hasRole(role: Role!) on FIELD_DEFINITION
 enum Role {
   ADMIN
@@ -42,6 +52,7 @@ enum Role {
 type Query {
   books(filter: BooksFilter): [Book!]!
   book(id: ID!): Book
+  lastBooks: [Book!]!
 }
 
 input BooksFilter {
@@ -50,9 +61,22 @@ input BooksFilter {
 
 type Mutation {
   createBook(input: NewBookInput!): Book! @hasRole(role: ADMIN)
+  delete(bookID: ID!): Boolean! @hasRole(role: ADMIN)
+  restart(bookID: ID!): Boolean! @hasRole(role: ADMIN)
+
   refreshToken(refreshToken: String!): JWT!
   loginRequest(input: LoginRequestInput!): ID!
   login(input: LoginInput!): JWT!
+  progress(input: ProgressInput!): Progress!
+}
+
+input ProgressInput {
+  bookID: ID!
+  part: Uint!
+  speed: Float!
+  position: Float!
+  globalDuration: Float!
+  globalPosition: Float!
 }
 
 input LoginRequestInput {
@@ -72,3 +96,4 @@ scalar Uint
 scalar Int64
 scalar DownloadState
 scalar BookState
+scalar Time

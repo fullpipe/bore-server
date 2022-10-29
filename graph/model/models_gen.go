@@ -31,6 +31,15 @@ type NewBookInput struct {
 	Magnet string `json:"magnet"`
 }
 
+type ProgressInput struct {
+	BookID         uint    `json:"bookID"`
+	Part           uint    `json:"part"`
+	Speed          float64 `json:"speed"`
+	Position       float64 `json:"position"`
+	GlobalDuration float64 `json:"globalDuration"`
+	GlobalPosition float64 `json:"globalPosition"`
+}
+
 type Role string
 
 const (

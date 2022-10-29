@@ -23,10 +23,23 @@ func (r *BookRepo) All() []*entity.Book {
 	return books
 }
 
+func (r *BookRepo) FindWithProgress(userID uint) []*entity.Book {
+	var books []*entity.Book
+
+	r.db.Limit(10).
+		Joins("INNER JOIN progress ON progress.book_id = book.id AND progress.user_id = ?", userID).
+		Order("progress.updated_at DESC").Find(&books)
+
+	return books
+}
+
 func (r *BookRepo) FindByID(bookID uint) *entity.Book {
 	var b entity.Book
 
-	r.db.Model(&entity.Book{}).First(&b, bookID)
+	result := r.db.Model(&entity.Book{}).First(&b, bookID)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return nil
+	}
 
 	return &b
 }
