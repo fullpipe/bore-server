@@ -32,3 +32,9 @@ func (c *Converter) Convert(part entity.Part) error {
 
 	return err
 }
+
+func (c *Converter) Delete(book *entity.Book) error {
+	dir := filepath.Join(c.bookDir, fmt.Sprintf("%d", book.ID))
+
+	return os.RemoveAll(dir)
+}

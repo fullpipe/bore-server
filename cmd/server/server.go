@@ -14,7 +14,6 @@ import (
 	"github.com/fullpipe/bore-server/graph/generated"
 	"github.com/fullpipe/bore-server/graph/model"
 	"github.com/fullpipe/bore-server/jwt"
-	"github.com/fullpipe/bore-server/repository"
 	"github.com/glebarez/sqlite"
 	"github.com/go-chi/chi"
 	"github.com/rs/cors"
@@ -73,26 +72,8 @@ func server(cCtx *cli.Context) error {
 
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(resoleversConfig))
 
-	// srv.AddTransport(&transport.Websocket{
-	// 	Upgrader: websocket.Upgrader{
-	// 		CheckOrigin: func(r *http.Request) bool {
-	// 			// Check against your desired domains here
-	// 			return r.Host == "example.org"
-	// 		},
-	// 		ReadBufferSize:  1024,
-	// 		WriteBufferSize: 1024,
-	// 	},
-	// })
-
 	fs := http.FileServer(http.Dir(cfg.BooksDir))
 	router.Handle("/books/*", http.StripPrefix("/books", fs))
-
-	// refreshParser, _ := jwt.NewEdDSAParser(cfg.JWT.PublicKey, "refresh")
-	// refreshTokenHandler := RefreshTokenHandler{
-	// 	refreshParser: refreshParser,
-	// 	userRepo:      repository.NewUserRepo(db),
-	// }
-	// router.Handle("/refresh", &refreshTokenHandler)
 
 	if cfg.Debug {
 		router.Handle("/playground", playground.Handler("Bore", "/query"))
@@ -101,14 +82,4 @@ func server(cCtx *cli.Context) error {
 	router.Handle("/query", srv)
 
 	return http.ListenAndServe(fmt.Sprintf(":%d", cfg.Server.Port), router)
-}
-
-type RefreshTokenHandler struct {
-	refreshParser jwt.Parser
-	userRepo      *repository.UserRepo
-}
-
-func (h *RefreshTokenHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-
-	w.Write([]byte("Это моя домашняя страница"))
 }

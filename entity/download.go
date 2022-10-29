@@ -21,7 +21,7 @@ type Download struct {
 	gorm.Model
 
 	Name   string
-	Magnet string `gorm:"index,unique"`
+	Magnet string `gorm:"index"`
 	State  DownloadState
 
 	Length     int64

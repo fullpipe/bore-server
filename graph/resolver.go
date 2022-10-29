@@ -22,6 +22,7 @@ type Resolver struct {
 	db            *gorm.DB
 	bookRepo      *repository.BookRepo
 	downloadRepo  *repository.DownloadRepo
+	progressRepo  *repository.ProgressRepo
 	downloader    *torrent.Downloader
 	converter     *bookSrv.Converter
 	mailer        *mail.Mailer
@@ -43,6 +44,7 @@ func NewResolver(
 		db:            db,
 		bookRepo:      repository.NewBookRepo(db),
 		downloadRepo:  repository.NewDownloadRepo(db),
+		progressRepo:  repository.NewProgressRepo(db),
 		downloader:    torrent.NewDownloader(cfg.TorrentsDir, db),
 		converter:     bookSrv.NewConverter(cfg.BooksDir),
 		mailer:        mailer,
@@ -54,11 +56,6 @@ func NewResolver(
 func (r *mutationResolver) downloadAndConvert(d *entity.Download, book *entity.Book) {
 	if book.State == entity.BookStateReady {
 		log.Infof("Book #%d %s already downloaded", book.ID, book.Title)
-		return
-	}
-
-	if book.State == entity.BookStateDownload {
-		log.Infof("Book #%d %s is in progress", book.ID, book.Title)
 		return
 	}
 
@@ -100,7 +97,6 @@ func (r *mutationResolver) downloadAndConvert(d *entity.Download, book *entity.B
 
 		// TODO: add book piture
 		// book.Picture: "???",
-
 		part := &entity.Part{
 			BookID:    book.ID,
 			Title:     m.Title(),
