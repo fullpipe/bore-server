@@ -14,7 +14,7 @@ import (
 	"gorm.io/gorm"
 )
 
-var validExtentions = [...]string{"mp3", "ogg", "flac"}
+var validExtentions = [...]string{".mp3", ".ogg", ".flac"}
 
 func NewDownloader(dataDir string, db *gorm.DB) *Downloader {
 	os.MkdirAll(dataDir, 0777)
@@ -101,6 +101,7 @@ func (dr *Downloader) GetFilePathsInOrder(d *entity.Download) ([]string, error) 
 			}
 
 			for _, ext := range validExtentions {
+				log.Println(filepath.Ext(path), path)
 				if filepath.Ext(path) == ext {
 					paths = append(paths, path)
 					break

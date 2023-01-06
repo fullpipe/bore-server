@@ -19,6 +19,7 @@ import (
 	"github.com/rs/cors"
 	"github.com/urfave/cli"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 const defaultPort = "8080"
@@ -48,7 +49,11 @@ func server(cCtx *cli.Context) error {
 		Debug:            cfg.Debug,
 	}).Handler)
 
-	db, err := gorm.Open(sqlite.Open(cfg.LiteDB), &gorm.Config{})
+	dbLogger := logger.Default.LogMode(logger.Warn)
+	if cfg.Debug {
+		dbLogger = logger.Default.LogMode(logger.Info)
+	}
+	db, err := gorm.Open(sqlite.Open(cfg.LiteDB), &gorm.Config{Logger: dbLogger})
 	if err != nil {
 		return err
 	}

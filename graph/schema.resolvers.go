@@ -69,7 +69,6 @@ func (r *mutationResolver) CreateBook(ctx context.Context, input model.NewBookIn
 		// reinit download if its a new book
 		d.State = entity.DownloadStateNew
 		r.db.Save(d)
-
 		r.db.Save(book)
 	}
 
@@ -106,7 +105,25 @@ func (r *mutationResolver) Delete(ctx context.Context, bookID uint) (bool, error
 
 // Restart is the resolver for the restart field.
 func (r *mutationResolver) Restart(ctx context.Context, bookID uint) (bool, error) {
-	panic(fmt.Errorf("not implemented: Restart - restart"))
+	book := r.bookRepo.FindByID(bookID)
+	if book == nil {
+		return false, errors.New("book not found")
+	}
+
+	download := r.downloadRepo.FindByID(book.DownloadID)
+	if download == nil {
+		return false, errors.New("book not found")
+	}
+
+	book.State = entity.BookStateDownload
+	download.State = entity.DownloadStateNew
+
+	r.db.Save(book)
+	r.db.Save(download)
+
+	go r.downloadAndConvert(download, book)
+
+	return true, nil
 }
 
 // RefreshToken is the resolver for the refreshToken field.
@@ -157,8 +174,12 @@ func (r *mutationResolver) LoginRequest(ctx context.Context, input model.LoginRe
 // Login is the resolver for the login field.
 func (r *mutationResolver) Login(ctx context.Context, input model.LoginInput) (*model.Jwt, error) {
 	var request entity.LoginRequest
-	result := r.db.Where("expires_at > datetime()").Find(&request, input.RequestID)
-	fmt.Println(result.Error)
+	result := r.db.
+		Where("expires_at > DATETIME('now', 'localtime')").
+		Order("created_at DESC").
+		First(&request, input.RequestID)
+
+	fmt.Println(result.Error, request)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return nil, errors.New("no request id")
 	}

@@ -4,6 +4,8 @@ package graph
 
 import (
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/dhowden/tag"
 	bookSrv "github.com/fullpipe/bore-server/book"
@@ -33,7 +35,6 @@ type Resolver struct {
 func NewResolver(
 	db *gorm.DB,
 	cfg config.Config,
-
 ) *Resolver {
 	mailer, _ := mail.NewMailer(cfg.Mailer)
 	signer, _ := jwt.NewEdDSASigner(cfg.JWT.PrivateKey)
@@ -97,9 +98,13 @@ func (r *mutationResolver) downloadAndConvert(d *entity.Download, book *entity.B
 
 		// TODO: add book piture
 		// book.Picture: "???",
+		partTitle := strings.TrimSpace(m.Title())
+		if partTitle == "" {
+			partTitle = filepath.Base(f.Name())
+		}
 		part := &entity.Part{
 			BookID:    book.ID,
-			Title:     m.Title(),
+			Title:     partTitle,
 			Possition: uint(i),
 			Source:    path,
 		}
@@ -109,17 +114,11 @@ func (r *mutationResolver) downloadAndConvert(d *entity.Download, book *entity.B
 		parts = append(parts, part)
 	}
 
-	r.db.Save(book)
+	if book.Title == "" {
+		book.Title = d.Name
+	}
 
-	// get meta info
-	// create BookPart
-	// 	source = source file path
-	//  dest = destination file path
-	//  meta
-	//  duration
-	// 	possition = i
-	//
-	// convert them to webp
+	r.db.Save(book)
 
 	for _, part := range parts {
 		err := r.converter.Convert(*part)
