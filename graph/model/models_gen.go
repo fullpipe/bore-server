@@ -9,7 +9,7 @@ import (
 )
 
 type BooksFilter struct {
-	Search *string `json:"search"`
+	Search *string `json:"search,omitempty"`
 }
 
 type Jwt struct {
