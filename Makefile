@@ -2,7 +2,7 @@ gen:
 	go generate ./...
 
 build:
-	docker build --target release -t rg.fr-par.scw.cloud/???/bore-server .
+	docker build --platform=linux/amd64 --target release -t registry.gitlab.com/fullpipe/registry/bore-server .
 
 push:
-	docker push rg.fr-par.scw.cloud/???/bore-server:latest
+	docker push registry.gitlab.com/fullpipe/registry/bore-server:latest

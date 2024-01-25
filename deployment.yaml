@@ -16,18 +16,25 @@ spec:
     spec:
       containers:
         - name: bore-server
-          image: rg.fr-par.scw.cloud/???/bore-server:latest
+          image: registry.gitlab.com/fullpipe/registry/bore-server:latest
           command: ['/go/bin/app', 'server']
           imagePullPolicy: Always
           envFrom:
             - secretRef:
-                name: server-env
+                name: bore-server.env
           resources:
             limits:
               cpu: '200m'
-              memory: '64Mi'
+              memory: '312Mi'
+          volumeMounts:
+            - name: bore-server-data
+              mountPath: /app/data
       imagePullSecrets:
-        - name: registry-secret
+        - name: gitlab-registry-secret
+      volumes:
+        - name: bore-server-data
+          persistentVolumeClaim:
+            claimName: bore-server-pvc
 ---
 apiVersion: v1
 kind: Service
@@ -45,41 +52,55 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: bore-server-ingress
-  annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+  name: bore-server
 spec:
+  ingressClassName: 'traefik'
   tls:
-    - secretName: bore.fullpipe.dev-cert
+    - hosts:
+        - bore.fullpipe.dev
+      secretName: bore.fullpipe.dev-tls
   rules:
     - host: bore.fullpipe.dev
       http:
         paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: bore-client-service
+                port:
+                  name: http
           - path: /query
             pathType: Prefix
             backend:
               service:
                 name: bore-server-service
                 port:
-                  number: 8080
+                  name: http
+          - path: /books
+            pathType: Prefix
+            backend:
+              service:
+                name: bore-server-service
+                port:
+                  name: http
           - path: /playground
             pathType: Prefix
             backend:
               service:
                 name: bore-server-service
                 port:
-                  number: 8080
+                  name: http
+
 ---
-apiVersion: cert-manager.io/v1
-kind: Certificate
+kind: PersistentVolumeClaim
+apiVersion: v1
 metadata:
-  name: bore.fullpipe.dev-cert
-  namespace: default
+  name: bore-server-pvc
 spec:
-  commonName: bore.fullpipe.dev
-  secretName: bore.fullpipe.dev-cert
-  dnsNames:
-    - bore.fullpipe.dev
-  issuerRef:
-    name: letsencrypt-prod
-    kind: ClusterIssuer
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 5Gi

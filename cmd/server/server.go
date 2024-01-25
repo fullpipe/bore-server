@@ -10,6 +10,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/fullpipe/bore-server/auth"
 	"github.com/fullpipe/bore-server/config"
+	"github.com/fullpipe/bore-server/entity"
 	"github.com/fullpipe/bore-server/graph"
 	"github.com/fullpipe/bore-server/graph/generated"
 	"github.com/fullpipe/bore-server/graph/model"
@@ -40,13 +41,9 @@ func server(cCtx *cli.Context) error {
 
 	router := chi.NewRouter()
 
-	// Add CORS middleware around every request
-	// See https://github.com/rs/cors for full option listing
 	router.Use(cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:8080", "http://localhost:8100", "http://localhost:4200"},
-		AllowCredentials: false,
-		AllowedHeaders:   []string{"*"},
-		Debug:            cfg.Debug,
+		AllowedHeaders: []string{"*"},
+		Debug:          cfg.Debug,
 	}).Handler)
 
 	dbLogger := logger.Default.LogMode(logger.Warn)
@@ -57,6 +54,14 @@ func server(cCtx *cli.Context) error {
 	if err != nil {
 		return err
 	}
+
+	// TODO: move to migration command
+	db.AutoMigrate(&entity.Download{})
+	db.AutoMigrate(&entity.Book{})
+	db.AutoMigrate(&entity.Part{})
+	db.AutoMigrate(&entity.LoginRequest{})
+	db.AutoMigrate(&entity.User{})
+	db.AutoMigrate(&entity.Progress{})
 
 	jwtParser, err := jwt.NewEdDSAParser(cfg.JWT.PublicKey, "access")
 	if err != nil {

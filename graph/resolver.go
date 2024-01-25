@@ -79,29 +79,29 @@ func (r *mutationResolver) downloadAndConvert(d *entity.Download, book *entity.B
 			log.Error(err)
 		}
 
+		partTitle := filepath.Base(f.Name())
 		m, err := tag.ReadFrom(f)
 		if err != nil {
 			log.Error(err)
-		}
+		} else {
+			if m.Album() != "" {
+				book.Title = m.Album()
+			}
 
-		if m.Album() != "" {
-			book.Title = m.Album()
-		}
+			if m.Artist() != "" && book.Author == "" {
+				book.Author = m.Artist()
+			}
 
-		if m.Artist() != "" && book.Author == "" {
-			book.Author = m.Artist()
-		}
-
-		if m.AlbumArtist() != "" && book.Reader == "" {
-			book.Reader = m.AlbumArtist()
+			if m.AlbumArtist() != "" && book.Reader == "" {
+				book.Reader = m.AlbumArtist()
+			}
+			if m.Title() != "" {
+				partTitle = strings.TrimSpace(m.Title())
+			}
 		}
 
 		// TODO: add book piture
 		// book.Picture: "???",
-		partTitle := strings.TrimSpace(m.Title())
-		if partTitle == "" {
-			partTitle = filepath.Base(f.Name())
-		}
 		part := &entity.Part{
 			BookID:    book.ID,
 			Title:     partTitle,
@@ -118,6 +118,7 @@ func (r *mutationResolver) downloadAndConvert(d *entity.Download, book *entity.B
 		book.Title = d.Name
 	}
 
+	book.State = entity.BookStateConvert
 	r.db.Save(book)
 
 	for _, part := range parts {

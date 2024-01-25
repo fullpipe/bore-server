@@ -5,6 +5,7 @@ import "gorm.io/gorm"
 const (
 	BookStateDownload BookState = "download"
 	BookStateError    BookState = "error"
+	BookStateConvert  BookState = "convert"
 	BookStateReady    BookState = "ready"
 )
 

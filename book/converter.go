@@ -27,7 +27,7 @@ func (c *Converter) Convert(part entity.Part) error {
 
 	err := ffmpeg.
 		Input(part.Source).
-		Output(out, ffmpeg.KwArgs{"q:a": 6, "vn": ""}).
+		Output(out, ffmpeg.KwArgs{"q:a": 7, "vn": ""}).
 		OverWriteOutput().ErrorToStdOut().Run()
 
 	return err

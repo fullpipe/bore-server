@@ -1,0 +1,25 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: bore-server-promote
+spec:
+  template:
+    spec:
+      containers:
+        - name: bore-server-promote
+          image: registry.gitlab.com/fullpipe/registry/bore-server:latest
+          command: ['/go/bin/app', 'promote', 'eugene.bravov@gmail.com', 'ADMIN']
+          imagePullPolicy: Always
+          envFrom:
+            - secretRef:
+                name: bore-server.env
+          volumeMounts:
+            - name: bore-server-data
+              mountPath: /app/data
+      restartPolicy: Never
+      imagePullSecrets:
+        - name: gitlab-registry-secret
+      volumes:
+        - name: bore-server-data
+          persistentVolumeClaim:
+            claimName: bore-server-pvc

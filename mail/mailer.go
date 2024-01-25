@@ -59,7 +59,7 @@ func WithParams(in map[string]any) func(params map[string]any) {
 func (mailer *Mailer) SendToEmail(message, email string, wps ...func(params map[string]any)) error {
 	m := gomail.NewMessage()
 
-	m.SetHeader("From", "noreply@chillz.app")
+	m.SetHeader("From", "noreply@bore.app")
 	m.SetHeader("To", email)
 
 	tmp, err := getTemplate(message)

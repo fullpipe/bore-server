@@ -22,7 +22,12 @@ COPY . .
 RUN go build -a -installsuffix cgo -ldflags="-w -s" -o /go/bin/app
 
 # release
-FROM scratch as release
-COPY --from=mwader/static-ffmpeg:5.1.2 /ffmpeg /usr/local/bin/
+FROM golang:alpine as release
+
+RUN apk update
+RUN apk upgrade
+RUN apk add --no-cache ffmpeg
+
+# COPY --from=mwader/static-ffmpeg:5.1.2 /ffmpeg /usr/local/bin/
 COPY --from=build /go/bin/app /go/bin/app
 ENTRYPOINT ["/go/bin/app"]

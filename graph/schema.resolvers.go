@@ -147,7 +147,7 @@ func (r *mutationResolver) RefreshToken(ctx context.Context, refreshToken string
 func (r *mutationResolver) LoginRequest(ctx context.Context, input model.LoginRequestInput) (uint, error) {
 	// otp := utils.RandOTP()
 	otp := "111112"
-	hash, err := passhash.NewHash().HashPassword(otp)
+	hash, err := passhash.NewHash().Cost(4).HashPassword(otp)
 	if err != nil {
 		return 0, err
 	}
