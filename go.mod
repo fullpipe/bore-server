@@ -1,6 +1,6 @@
 module github.com/fullpipe/bore-server
 
-go 1.21
+go 1.22
 
 require (
 	github.com/99designs/gqlgen v0.17.40
@@ -22,6 +22,7 @@ require (
 	github.com/vektah/gqlparser/v2 v2.5.10
 	golang.org/x/exp v0.0.0-20231006140011-7918f672742d
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
+	gopkg.in/vansante/go-ffprobe.v2 v2.1.1
 	gorm.io/gorm v1.25.5
 )
 

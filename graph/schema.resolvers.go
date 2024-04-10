@@ -155,7 +155,7 @@ func (r *mutationResolver) LoginRequest(ctx context.Context, input model.LoginRe
 	otpRequest := entity.LoginRequest{
 		Email:     input.Email,
 		Code:      hash,
-		ExpiresAt: time.Now().Add(time.Minute * 100), //TODO: correct time
+		ExpiresAt: time.Now().Add(10 * time.Minute),
 	}
 
 	r.db.Create(&otpRequest)
@@ -220,8 +220,6 @@ func (r *mutationResolver) Progress(ctx context.Context, input model.ProgressInp
 	p.Part = input.Part
 	p.Speed = input.Speed
 	p.Position = input.Position
-	p.GlobalDuration = input.GlobalDuration
-	p.GlobalPosition = input.GlobalPosition
 
 	r.db.Save(p)
 

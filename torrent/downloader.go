@@ -101,7 +101,6 @@ func (dr *Downloader) GetFilePathsInOrder(d *entity.Download) ([]string, error) 
 			}
 
 			for _, ext := range validExtentions {
-				log.Println(filepath.Ext(path), path)
 				if filepath.Ext(path) == ext {
 					paths = append(paths, path)
 					break

@@ -3,9 +3,11 @@
 package graph
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/dhowden/tag"
 	bookSrv "github.com/fullpipe/bore-server/book"
@@ -16,7 +18,10 @@ import (
 	"github.com/fullpipe/bore-server/mail"
 	"github.com/fullpipe/bore-server/repository"
 	"github.com/fullpipe/bore-server/torrent"
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
+	"gopkg.in/vansante/go-ffprobe.v2"
 	"gorm.io/gorm"
 )
 
@@ -101,12 +106,16 @@ func (r *mutationResolver) downloadAndConvert(d *entity.Download, book *entity.B
 		}
 
 		// TODO: add book piture
-		// book.Picture: "???",
 		part := &entity.Part{
 			BookID:    book.ID,
 			Title:     partTitle,
 			Possition: uint(i),
 			Source:    path,
+		}
+
+		part.Duration, err = getFileDuration(context.Background(), part.Source)
+		if err != nil {
+			logrus.Error(err)
 		}
 
 		r.db.Save(part)
@@ -140,6 +149,18 @@ func (r *mutationResolver) downloadAndConvert(d *entity.Download, book *entity.B
 	if err != nil {
 		log.Error(err)
 	}
+}
+
+func getFileDuration(ctx context.Context, path string) (float64, error) {
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	data, err := ffprobe.ProbeURL(ctx, path)
+	if err != nil {
+		return 0, errors.Wrap(err, "getFileDuration")
+	}
+
+	return data.Format.DurationSeconds, nil
 }
 
 func jwtResponce(jwtBuilder *jwt.Builder, user *entity.User) (*model.Jwt, error) {

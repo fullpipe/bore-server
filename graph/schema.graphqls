@@ -16,6 +16,7 @@ type Part {
   possition: Uint!
   source: String!
   path: String!
+  duration: Float!
 }
 
 type Download {
@@ -38,8 +39,6 @@ type Progress {
   part: Uint!
   speed: Float!
   position: Float!
-  globalDuration: Float!
-  globalPosition: Float!
   updatedAt: Time!
 }
 
@@ -75,8 +74,6 @@ input ProgressInput {
   part: Uint!
   speed: Float!
   position: Float!
-  globalDuration: Float!
-  globalPosition: Float!
 }
 
 input LoginRequestInput {

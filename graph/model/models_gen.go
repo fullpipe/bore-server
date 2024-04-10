@@ -32,12 +32,10 @@ type NewBookInput struct {
 }
 
 type ProgressInput struct {
-	BookID         uint    `json:"bookID"`
-	Part           uint    `json:"part"`
-	Speed          float64 `json:"speed"`
-	Position       float64 `json:"position"`
-	GlobalDuration float64 `json:"globalDuration"`
-	GlobalPosition float64 `json:"globalPosition"`
+	BookID   uint    `json:"bookID"`
+	Part     uint    `json:"part"`
+	Speed    float64 `json:"speed"`
+	Position float64 `json:"position"`
 }
 
 type Role string

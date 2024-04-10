@@ -11,9 +11,7 @@ type Progress struct {
 	UserID uint
 	User   *User
 
-	Part           uint
-	Speed          float64
-	Position       float64
-	GlobalDuration float64
-	GlobalPosition float64
+	Part     uint
+	Position float64
+	Speed    float64
 }

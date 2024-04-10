@@ -20,7 +20,7 @@ type Part struct {
 	Source string
 	// Path   string
 
-	Duration uint
+	Duration float64
 }
 
 func (p *Part) Path() string {
