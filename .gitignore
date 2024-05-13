@@ -11,3 +11,4 @@ downloads/
 public/
 graph/generated/generated.go
 /*.pem
+lite.db
