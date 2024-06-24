@@ -15,8 +15,8 @@ func initTemplates() {
 	templates["login.post_login_request"] = emailTemplate{
 		Subject: "Bore app login OTP",
 		Body: `
-		Hello, {{.user.Email}}!<br />
-		Your login OTP is: <b>{{.otp}}</b>
+		Hello, {{.email}}!<br />
+		Here your one time password: <b>{{.otp}}</b>
 		`,
 	}
 

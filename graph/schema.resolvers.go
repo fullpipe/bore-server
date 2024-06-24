@@ -16,6 +16,7 @@ import (
 	"github.com/fullpipe/bore-server/graph/generated"
 	"github.com/fullpipe/bore-server/graph/model"
 	"github.com/fullpipe/bore-server/mail"
+	"github.com/fullpipe/bore-server/utils"
 	"github.com/fullpipe/passhash"
 	"gorm.io/gorm"
 )
@@ -145,8 +146,8 @@ func (r *mutationResolver) RefreshToken(ctx context.Context, refreshToken string
 
 // LoginRequest is the resolver for the loginRequest field.
 func (r *mutationResolver) LoginRequest(ctx context.Context, input model.LoginRequestInput) (uint, error) {
-	// otp := utils.RandOTP()
-	otp := "111112"
+	otp := utils.RandOTP()
+	// otp := "111112"
 	hash, err := passhash.NewHash().Cost(4).HashPassword(otp)
 	if err != nil {
 		return 0, err
@@ -160,14 +161,12 @@ func (r *mutationResolver) LoginRequest(ctx context.Context, input model.LoginRe
 
 	r.db.Create(&otpRequest)
 
-	err = r.mailer.SendToEmail(
+	go r.mailer.SendToEmail(
 		"login.post_login_request",
 		input.Email,
 		mail.WithParam("otp", otp),
+		mail.WithParam("email", input.Email),
 	)
-	if err != nil {
-		return 0, err
-	}
 
 	return otpRequest.ID, nil
 }

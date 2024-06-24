@@ -2,7 +2,6 @@ package mail
 
 import (
 	"bytes"
-	"crypto/tls"
 	"text/template"
 
 	"github.com/fullpipe/bore-server/entity"
@@ -23,7 +22,7 @@ type MailerConfig struct {
 
 func NewMailer(cfg MailerConfig) (*Mailer, error) {
 	d := gomail.NewDialer(cfg.Host, cfg.Port, cfg.Username, cfg.Password)
-	d.TLSConfig = &tls.Config{InsecureSkipVerify: true}
+	// d.TLSConfig = &tls.Config{InsecureSkipVerify: true}
 
 	mailer := Mailer{dialer: d}
 	initTemplates()
@@ -59,7 +58,7 @@ func WithParams(in map[string]any) func(params map[string]any) {
 func (mailer *Mailer) SendToEmail(message, email string, wps ...func(params map[string]any)) error {
 	m := gomail.NewMessage()
 
-	m.SetHeader("From", "noreply@bore.app")
+	m.SetAddressHeader("From", "noreply@fullpipe.dev", "Bore app")
 	m.SetHeader("To", email)
 
 	tmp, err := getTemplate(message)

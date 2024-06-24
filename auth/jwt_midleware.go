@@ -90,7 +90,5 @@ func Roles(ctx context.Context) []string {
 		return []string{}
 	}
 
-	log.Info("Roles: ", raw.payload.Roles)
-
 	return raw.payload.Roles
 }
