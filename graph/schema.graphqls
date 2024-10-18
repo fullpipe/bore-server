@@ -10,6 +10,21 @@ type Book {
   progress: Progress
 }
 
+enum BookState {
+  download
+  error
+  convert
+  ready
+}
+
+enum DownloadState {
+  new
+  in_progress
+  error
+  done
+  delete
+}
+
 type Part {
   id: ID!
   title: String!
@@ -91,6 +106,4 @@ input NewBookInput {
 
 scalar Uint
 scalar Int64
-scalar DownloadState
-scalar BookState
 scalar Time
