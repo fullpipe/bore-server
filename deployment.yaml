@@ -17,15 +17,11 @@ spec:
       containers:
         - name: bore-server
           image: registry.gitlab.com/fullpipe/registry/bore-server:latest
-          command: ['/go/bin/app', 'server']
+          command: ["/go/bin/app", "server"]
           imagePullPolicy: Always
           envFrom:
             - secretRef:
                 name: bore-server.env
-          resources:
-            limits:
-              cpu: '200m'
-              memory: '312Mi'
           volumeMounts:
             - name: bore-server-data
               mountPath: /app/data
@@ -54,7 +50,7 @@ kind: Ingress
 metadata:
   name: bore-server
 spec:
-  ingressClassName: 'traefik'
+  ingressClassName: "traefik"
   tls:
     - hosts:
         - bore.fullpipe.dev
@@ -103,4 +99,4 @@ spec:
   storageClassName: local-path
   resources:
     requests:
-      storage: 5Gi
+      storage: 50Gi
