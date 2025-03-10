@@ -1,0 +1,19 @@
+version: "3"
+
+env:
+  IMAGE_PATH: registry.gitlab.com/fullpipe/registry/bore-server
+
+tasks:
+  gen:
+    - go run github.com/99designs/gqlgen generate --config gqlgen.yml
+    - go generate ./...
+  mockery: docker run -v "$PWD":/src -w /src vektra/mockery --all
+  build: docker build --platform=linux/amd64 --target release -t $IMAGE_PATH .
+  push: docker push $IMAGE_PATH:latest
+  deploy:
+    - task: build
+    - task: push
+  watch:
+    - gowatch -args server
+  dev:
+    - task: watch

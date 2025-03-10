@@ -13,3 +13,4 @@ graph/generated/generated.go
 /*.pem
 lite.db
 .env
+/bore-server

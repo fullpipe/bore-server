@@ -12,3 +12,4 @@ public/
 # graph/generated/generated.go
 /*.pem
 /*.db
+/bore-server

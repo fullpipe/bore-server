@@ -8,6 +8,12 @@ import (
 	"strconv"
 )
 
+type BookInput struct {
+	Title  string `json:"title"`
+	Author string `json:"author"`
+	Reader string `json:"reader"`
+}
+
 type BooksFilter struct {
 	Search *string `json:"search,omitempty"`
 }
@@ -27,6 +33,9 @@ type LoginRequestInput struct {
 	Email string `json:"email"`
 }
 
+type Mutation struct {
+}
+
 type NewBookInput struct {
 	Magnet string `json:"magnet"`
 }
@@ -36,6 +45,9 @@ type ProgressInput struct {
 	Part     uint    `json:"part"`
 	Speed    float64 `json:"speed"`
 	Position float64 `json:"position"`
+}
+
+type Query struct {
 }
 
 type Role string
@@ -62,7 +74,7 @@ func (e Role) String() string {
 	return string(e)
 }
 
-func (e *Role) UnmarshalGQL(v interface{}) error {
+func (e *Role) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")

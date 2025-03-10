@@ -74,7 +74,9 @@ input BooksFilter {
 }
 
 type Mutation {
-  createBook(input: NewBookInput!): Book! @hasRole(role: ADMIN)
+  bookCreate(input: NewBookInput!): Book! @hasRole(role: ADMIN)
+  bookUpdate(id: ID!, input: BookInput!): Book! @hasRole(role: ADMIN)
+
   delete(bookID: ID!): Boolean! @hasRole(role: ADMIN)
   restart(bookID: ID!): Boolean! @hasRole(role: ADMIN)
 
@@ -104,6 +106,16 @@ input NewBookInput {
   magnet: String!
 }
 
+input BookInput {
+  title: String!
+  author: String!
+  reader: String!
+}
+
 scalar Uint
 scalar Int64
 scalar Time
+scalar JSON
+scalar Upload
+scalar Any
+scalar UUID
