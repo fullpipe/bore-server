@@ -28,7 +28,7 @@ func (c *Converter) Convert(part entity.Part) error {
 	err := ffmpeg.
 		Input(part.Source).
 		// Output(out, ffmpeg.KwArgs{"threads:v": 1, "q:a": 4, "vn": ""}). // https://trac.ffmpeg.org/wiki/Encode/MP3#VBREncoding
-		Output(out, ffmpeg.KwArgs{"q:a": 4}). // https://trac.ffmpeg.org/wiki/Encode/MP3#VBREncoding
+		Output(out, ffmpeg.KwArgs{"threads:a": 4, "q:a": 4}). // https://trac.ffmpeg.org/wiki/Encode/MP3#VBREncoding
 		OverWriteOutput().ErrorToStdOut().Run()
 
 	return err

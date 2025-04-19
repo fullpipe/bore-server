@@ -6,6 +6,7 @@ require (
 	github.com/99designs/gqlgen v0.17.66
 	github.com/anacrolix/torrent v1.58.1
 	github.com/dhowden/tag v0.0.0-20240417053706-3d75831295e8
+	github.com/fullpipe/futf v0.0.0-20250326170708-334c6c70c46b
 	github.com/fullpipe/passhash v0.0.1
 	github.com/glebarez/sqlite v1.11.0
 	github.com/go-chi/chi v1.5.5

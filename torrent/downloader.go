@@ -14,7 +14,7 @@ import (
 	"gorm.io/gorm"
 )
 
-var validExtentions = [...]string{".mp3", ".ogg", ".flac"}
+var validExtentions = [...]string{".mp3", ".ogg", ".flac", ".m4b"}
 
 func NewDownloader(dataDir string, db *gorm.DB) *Downloader {
 	os.MkdirAll(dataDir, 0777)

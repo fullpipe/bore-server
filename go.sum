@@ -149,6 +149,8 @@ github.com/frankban/quicktest v1.14.4/go.mod h1:4ptaffx2x8+WTWXmUCuVU6aPUX1/Mz7z
 github.com/frankban/quicktest v1.14.6 h1:7Xjx+VpznH+oBnejlPUj8oUpdxnVs4f8XU8WnHkI4W8=
 github.com/frankban/quicktest v1.14.6/go.mod h1:4ptaffx2x8+WTWXmUCuVU6aPUX1/Mz7zb5vbUoiM6w0=
 github.com/fsnotify/fsnotify v1.4.7/go.mod h1:jwhsz4b93w/PPRr/qN1Yymfu8t87LnFCMoQvtojpjFo=
+github.com/fullpipe/futf v0.0.0-20250326170708-334c6c70c46b h1:CcOzVb921Go0w1gp+IPXKfLfJAjfgA+y42usoyuqe2k=
+github.com/fullpipe/futf v0.0.0-20250326170708-334c6c70c46b/go.mod h1:W1tEotP53Cs43uOPgtPfa8zzj5R15vnIyiOLrY6isvc=
 github.com/fullpipe/passhash v0.0.1 h1:L0QlB2fTjY1N0hhO0zdVCCsGJrFLsjrC6vA0wY0fd/c=
 github.com/fullpipe/passhash v0.0.1/go.mod h1:xxWojo57knuaoR4YulBjnu577zU3HjsXEcjYccr70/4=
 github.com/glebarez/go-sqlite v1.22.0 h1:uAcMJhaA6r3LHMTFgP0SifzgXg46yJkgxqyuyec+ruQ=

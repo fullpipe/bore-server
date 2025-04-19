@@ -16,6 +16,7 @@ import (
 	"github.com/fullpipe/bore-server/mail"
 	"github.com/fullpipe/bore-server/repository"
 	"github.com/fullpipe/bore-server/torrent"
+	"github.com/fullpipe/futf"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
@@ -88,18 +89,18 @@ func (r *mutationResolver) downloadAndConvert(d *entity.Download, book *entity.B
 			log.Error(err)
 		} else {
 			if m.Album() != "" {
-				book.Title = m.Album()
+				book.Title = futf.ToUTF8(m.Album())
 			}
 
 			if m.Artist() != "" && book.Author == "" {
-				book.Author = m.Artist()
+				book.Author = futf.ToUTF8(m.Artist())
 			}
 
 			if m.AlbumArtist() != "" && book.Reader == "" {
-				book.Reader = m.AlbumArtist()
+				book.Reader = futf.ToUTF8(m.AlbumArtist())
 			}
 			if m.Title() != "" {
-				partTitle = strings.TrimSpace(m.Title())
+				partTitle = strings.TrimSpace(futf.ToUTF8(m.Title()))
 			}
 		}
 
@@ -122,7 +123,7 @@ func (r *mutationResolver) downloadAndConvert(d *entity.Download, book *entity.B
 	}
 
 	if book.Title == "" {
-		book.Title = d.Name
+		book.Title = futf.ToUTF8(d.Name)
 	}
 
 	book.State = entity.BookStateConvert
